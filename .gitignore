@@ -7,3 +7,4 @@
 .#*.scm
 
 */target
+.DS_Store
