@@ -2,20 +2,19 @@ use std::convert::TryFrom;
 use std::fmt::Debug;
 use std::mem;
 
-
 struct Node<T> {
     keys: Vec<T>,
     children: Vec<Node<T>>,
 }
 
-pub struct BTree<T>{
+pub struct BTree<T> {
     root: Node<T>,
     props: BTreeProps,
 }
 
 // Why to need a different Struct for props...
 // Check - http://smallcultfollowing.com/babysteps/blog/2018/11/01/after-nll-interprocedural-conflicts/#fnref:improvement
-struct BTreeProps{
+struct BTreeProps {
     degree: usize,
     max_keys: usize,
     mid_key_index: usize,
@@ -25,77 +24,75 @@ impl<T> Node<T>
 where
     T: Ord,
 {
-    fn new(degree: usize, _key: Option<Vec<T>>, _children: Option<Vec<Node<T>>>) -> Self{
-        Node{
-            keys: match _key{
-                Some(_key)=>_key,
-                None => Vec::with_capacity(degree -1),
+    fn new(degree: usize, _key: Option<Vec<T>>, _children: Option<Vec<Node<T>>>) -> Self {
+        Node {
+            keys: match _key {
+                Some(_key) => _key,
+                None => Vec::with_capacity(degree - 1),
             },
-            children: match _children{
+            children: match _children {
                 Some(_children) => _children,
-                None=> Vec::with_capacity(degree),
+                None => Vec::with_capacity(degree),
             },
         }
     }
 
-    fn is_leaf(&self) -> bool{
+    fn is_leaf(&self) -> bool {
         self.children.is_empty()
     }
 }
 
-impl BTreeProps{
-    fn new(degree: usize) -> Self{
-        BTreeProps{
+impl BTreeProps {
+    fn new(degree: usize) -> Self {
+        BTreeProps {
             degree,
-            max_keys:degree-1,
-            mid_key_index: (degree-1)/2,
+            max_keys: degree - 1,
+            mid_key_index: (degree - 1) / 2,
         }
     }
 
-    fn is_maxed_out<T: Ord+Copy>(&self, node: &Node<T>) -> bool{
-        node.keys.len()==self.max_keys
+    fn is_maxed_out<T: Ord + Copy>(&self, node: &Node<T>) -> bool {
+        node.keys.len() == self.max_keys
     }
 
     fn split_child<T>(&self, parent: &mut Node<T>, child_index: usize)
     where
-        T: Ord+Copy+Default,
+        T: Ord + Copy + Default,
     {
-        let child =&mut parent.children[child_index];
-        let middle_key=child.keys[self.mid_key_index];
-        let right_keys =match child.keys.split_off(self.mid_key_index).split_first(){
-            Some((_first, _others))=> {
-                _others.to_vec()
-            }
-            None=> Vec::with_capacity(self.max_keys),
+        let child = &mut parent.children[child_index];
+        let middle_key = child.keys[self.mid_key_index];
+        let right_keys = match child.keys.split_off(self.mid_key_index).split_first() {
+            Some((_first, _others)) => _others.to_vec(),
+            None => Vec::with_capacity(self.max_keys),
         };
-        let right_children =if !child.is_leaf(){
-            Some(child.children.split_off(self.mid_key_index+1))
-        }else{
+        let right_children = if !child.is_leaf() {
+            Some(child.children.split_off(self.mid_key_index + 1))
+        } else {
             None
         };
-        let new_child_node: Node<T>=Node::new(self.degree, Some(right_keys), right_children);
+        let new_child_node: Node<T> = Node::new(self.degree, Some(right_keys), right_children);
 
         parent.keys.insert(child_index, middle_key);
-        parent.children.insert(child_index+1, new_child_node);
+        parent.children.insert(child_index + 1, new_child_node);
     }
 
     fn insert_non_full<T>(&mut self, node: &mut Node<T>, key: T)
     where
-        T: Ord+Copy+Default,
+        T: Ord + Copy + Default,
     {
-        let mut index: isize =isize::try_from(node.keys.len()).ok().unwrap()-1;
-        while index>=0 && node.keys[index as usize] >= key{
-            index-=1;
+        let mut index: isize = isize::try_from(node.keys.len()).ok().unwrap() - 1;
+        while index >= 0 && node.keys[index as usize] >= key {
+            index -= 1;
         }
-        let mut u_index: usize =usize::try_from(index+1).ok().unwrap();
-        if node.is_leaf(){
+        let mut u_index: usize = usize::try_from(index + 1).ok().unwrap();
+        if node.is_leaf() {
             // Just insert it, as we know this method will be called only when node is not full
             node.keys.insert(u_index, key);
-        }else{
-            if self.is_maxed_out(&node.children[u_index]){
+        } else {
+            if self.is_maxed_out(&node.children[u_index]) {
                 self.split_child(node, u_index);
-                if node.keys[u_index]<key{
-                    u_index+=1;
+                if node.keys[u_index] < key {
+                    u_index += 1;
                 }
             }
             self.insert_non_full(&mut node.children[u_index], key);
@@ -104,15 +101,15 @@ impl BTreeProps{
 
     fn traverse_node<T>(&self, node: &Node<T>, depth: usize)
     where
-        T: Ord+ Debug,
+        T: Ord + Debug,
     {
-        if node.is_leaf(){
-            print!("{0:{<1$}{2:?}{0:}<1$}","",depth, node.keys);
-        }else{
-            let _depth=depth+1;
-            for (index, key) in node.keys.iter().enumerate(){
+        if node.is_leaf() {
+            print!("{0:{<1$}{2:?}{0:}<1$}", "", depth, node.keys);
+        } else {
+            let _depth = depth + 1;
+            for (index, key) in node.keys.iter().enumerate() {
                 self.traverse_node(&node.children[index], _depth);
-                print!("{0:{<1$}{2:?}{0:}<1$}","",depth, key);
+                print!("{0:{<1$}{2:?}{0:}<1$}", "", depth, key);
             }
             self.traverse_node(node.children.last().unwrap(), _depth);
         }
@@ -121,60 +118,60 @@ impl BTreeProps{
 
 impl<T> BTree<T>
 where
-    T: Ord+ Copy+ Debug+ Default,
+    T: Ord + Copy + Debug + Default,
 {
-    pub fn new(branch_factor: usize) -> Self{
-        let degree =2* branch_factor;
-        BTree{
+    pub fn new(branch_factor: usize) -> Self {
+        let degree = 2 * branch_factor;
+        BTree {
             root: Node::new(degree, None, None),
             props: BTreeProps::new(degree),
         }
     }
 
-    pub fn insert(&mut self, key: T){
-        if self.props.is_maxed_out(&self.root){
+    pub fn insert(&mut self, key: T) {
+        if self.props.is_maxed_out(&self.root) {
             // Create an empty root and split the old root...
-            let mut new_root=Node::new(self.props.degree, None, None);
+            let mut new_root = Node::new(self.props.degree, None, None);
             mem::swap(&mut new_root, &mut self.root);
             self.root.children.insert(0, new_root);
-            self.props.split_child(&mut self.root,0);
+            self.props.split_child(&mut self.root, 0);
         }
-        self.props.insert_non_full(&mut self.root,key);
+        self.props.insert_non_full(&mut self.root, key);
     }
 
-    pub fn traverse(&self){
+    pub fn traverse(&self) {
         self.props.traverse_node(&self.root, 0);
         println!();
     }
 
-    pub fn search(&self, key: T)-> bool{
-        let mut current_node=&self.root;
+    pub fn search(&self, key: T) -> bool {
+        let mut current_node = &self.root;
         let mut index: isize;
-        loop{
-            index=isize::try_from(current_node.keys.len()).ok().unwrap()-1;
-            while index>=0 && current_node.keys[index as usize] > key{
-                index -=1;
+        loop {
+            index = isize::try_from(current_node.keys.len()).ok().unwrap() - 1;
+            while index >= 0 && current_node.keys[index as usize] > key {
+                index -= 1;
             }
 
-            let u_index: usize=usize::try_from(index+1).ok().unwrap();
-            if index>=0 && current_node.keys[u_index-1]==key{
+            let u_index: usize = usize::try_from(index + 1).ok().unwrap();
+            if index >= 0 && current_node.keys[u_index - 1] == key {
                 break true;
-            }else if current_node.is_leaf(){
+            } else if current_node.is_leaf() {
                 break false;
-            }else{
-                current_node=&current_node.children[u_index];
+            } else {
+                current_node = &current_node.children[u_index];
             }
         }
     }
 }
 
 #[cfg(test)]
-mod test_b_tree{
+mod test_b_tree {
     use super::BTree;
 
     #[test]
     fn test_search() {
-        let mut tree=BTree::new(2);
+        let mut tree = BTree::new(2);
         tree.insert(10);
         tree.insert(20);
         tree.insert(30);

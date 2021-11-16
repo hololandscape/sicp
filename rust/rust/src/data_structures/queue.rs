@@ -1,60 +1,59 @@
 // queue
 #[derive(Debug)]
-pub struct Queue<T>{
+pub struct Queue<T> {
     elements: Vec<T>,
 }
 
-
-impl<T: Clone> Queue<T>{
-    pub fn new()-> Queue<T>{
-        Queue{
+impl<T: Clone> Queue<T> {
+    pub fn new() -> Queue<T> {
+        Queue {
             elements: Vec::new(),
         }
     }
 
-    pub fn enqueue(&mut self, value: T){
+    pub fn enqueue(&mut self, value: T) {
         self.elements.push(value)
     }
 
-    pub fn dequeue(&mut self)-> Result<T, &str>{
-        if !self.elements.is_empty(){
+    pub fn dequeue(&mut self) -> Result<T, &str> {
+        if !self.elements.is_empty() {
             Ok(self.elements.remove(0usize))
-        }else{
+        } else {
             Err("Queue is empty")
         }
     }
 
-    pub fn peek(&self)-> Result<&T, &str>{
-        match self.elements.first(){
-            Some(value)=> Ok(value),
-            None=> Err("Queue is empty"),
+    pub fn peek(&self) -> Result<&T, &str> {
+        match self.elements.first() {
+            Some(value) => Ok(value),
+            None => Err("Queue is empty"),
         }
     }
 
-    pub fn size(&self)-> usize{
+    pub fn size(&self) -> usize {
         self.elements.len()
     }
 
-    pub fn is_empty(&self)-> bool{
+    pub fn is_empty(&self) -> bool {
         self.elements.is_empty()
     }
 }
 
-impl<T> Default for Queue<T>{
-    fn default() -> Queue<T>{
-        Queue{
+impl<T> Default for Queue<T> {
+    fn default() -> Queue<T> {
+        Queue {
             elements: Vec::new(),
         }
     }
 }
 
 #[cfg(test)]
-mod test_queue{
+mod test_queue {
     use super::Queue;
 
     #[test]
     fn test_enqueue() {
-        let mut queue: Queue<u8> =Queue::new();
+        let mut queue: Queue<u8> = Queue::new();
         queue.enqueue(64);
         assert_eq!(queue.is_empty(), false);
     }
@@ -86,5 +85,4 @@ mod test_queue{
         queue.enqueue(16);
         assert_eq!(2, queue.size());
     }
-
 }

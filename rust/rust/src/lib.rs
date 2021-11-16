@@ -1,7 +1,6 @@
-pub mod sorting;
-pub mod searching;
 pub mod data_structures;
-
+pub mod searching;
+pub mod sorting;
 
 #[cfg(test)]
 mod test_lib {
@@ -10,10 +9,10 @@ mod test_lib {
 
     #[test]
     fn quick_sort() {
-        let mut ve1=vec![6,5,4,3,2,1];
+        let mut ve1 = vec![6, 5, 4, 3, 2, 1];
         sorting::quick_sort(&mut ve1);
-        for i in 0..ve1.len()-1{
-            assert!(ve1[i]<=ve1[i+1]);
+        for i in 0..ve1.len() - 1 {
+            assert!(ve1[i] <= ve1[i + 1]);
         }
 
         //pre-sorted
@@ -23,5 +22,4 @@ mod test_lib {
             assert!(ve2[i] <= ve2[i + 1]);
         }
     }
-    
 }
