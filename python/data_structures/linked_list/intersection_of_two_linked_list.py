@@ -15,6 +15,9 @@ class Solution:
     def getIntersectionNode(self, headA: ListNode, headB: ListNode) -> ListNode:
         a,b=headA,headB
         # if linked list intersection, a must equal to b
+        # For me is too tricky,there are two lists A and B, len(A) <len(B) with 2 nodes. 
+        # And while we iterate the merge list, A will faster then B to iterate from head B due to we merge the list.
+        # So, A will travel more nodes than B and reach the intersection node at the same time
         while(a!=b):
             # here need to deal with the situation that if a finish iterator, we need to let a to link B
             # we let A+B and B+A, and iterate both of them to check the intersection of two linked list
@@ -22,7 +25,8 @@ class Solution:
             b = headA if b is None else b.next
         return a
 
-# Time Complexity: O(n)
+# Time Complexity: O(m+n) m=len(a), n=len(b)
 # Space Complexity: O(1)
 
 ### https://dev.to/seanpgallivan/solution-intersection-of-two-linked-lists-478e
+### https://aaronice.gitbook.io/lintcode/linked_list/intersection-of-two-linked-lists
