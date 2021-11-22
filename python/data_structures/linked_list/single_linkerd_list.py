@@ -83,6 +83,7 @@ class LinkedList:
         # https://leetcode.com/explore/learn/card/linked-list/209/singly-linked-list/1290/
 
         # So, we must keep here, index<=len(self), and range(index-1) not range (index) below
+        # like len(self) is 0
         if not 0<=index <= len(self):
             raise IndexError("out of range")
         # O(1) due to we know the first node is head
